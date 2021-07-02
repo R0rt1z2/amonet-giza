@@ -23,8 +23,8 @@ void _putchar(char character)
     low_uart_put(character);
 }
 
-int (*original_read)(struct device_t *dev, uint64_t block_off, void *dst, size_t sz, int part) = (void*)0x4BD35539;
-int (*app)() = (void*)0x4BD3ED61;
+int (*original_read)(struct device_t *dev, uint64_t block_off, void *dst, size_t sz, int part) = (void*)0x4BD35685;
+int (*app)() = (void*)0x4BD3EF11;
 
 uint64_t g_boot, g_boot_x, g_lk, g_misc, g_recovery, g_recovery_x;
 
@@ -220,14 +220,14 @@ int main() {
     printf("o_boot_mode %u\n", *o_boot_mode);
 
     // device is unlocked
-    patch = (void*)0x4BD2054C;
+    patch = (void*)0x4BD205EC;
     *patch++ = 0x2001; // movs r0, #1
     *patch = 0x4770;   // bx lr
 
     // amzn_verify_limited_unlock (to set androidboot.unlocked_kernel=true)
-    // patch = (void*)0x4BD2080C;
-    // *patch++ = 0x2000; // movs r0, #0
-    // *patch = 0x4770;   // bx lr
+    patch = (void*)0x4BD2080C;
+    *patch++ = 0x2000; // movs r0, #0
+    *patch = 0x4770;   // bx lr
 
     //printf("(void*)dev->read 0x%08X\n", (void*)dev->read);
     //printf("(void*)&dev->read 0x%08X\n", (void*)&dev->read);
@@ -238,14 +238,14 @@ int main() {
 
     original_read = (void*)dev->read;
 
-    patch32 = (void*)0x4BD76188;
+    patch32 = (void*)0x4BD76AD8;
     *patch32 = (uint32_t)read_func;
 
     patch32 = (void*)&dev->read;
     *patch32 = (uint32_t)read_func;
 
     // patch max-download-size to accommodate for payload
-    patch32 = (void*)0x4BD3F802;
+    patch32 = (void*)0x4BD3FA8E;
     *patch32 = 0x0380F503; // ADD.W	R3, R3, #0x400000
 
     printf("Clean lk\n");
